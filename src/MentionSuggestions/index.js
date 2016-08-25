@@ -6,6 +6,7 @@ import decodeOffsetKey from '../utils/decodeOffsetKey';
 import { genKey } from 'draft-js';
 import getSearchText from '../utils/getSearchText';
 import defaultEntryComponent from './Entry/defaultEntryComponent';
+import { List } from 'immutable';
 
 export default class MentionSuggestions extends Component {
 
@@ -16,6 +17,14 @@ export default class MentionSuggestions extends Component {
       'MUTABLE',
     ]),
     entryComponent: PropTypes.func,
+    suggestions: (props, propName, componentName) => {
+      if (!List.isList(props[propName])) {
+        return new Error(
+          `Invalid prop \`${propName}\' supplied to \`${componentName}\`. should be an instance of immutable list.`
+        );
+      }
+      return undefined;
+    },
   };
 
   static defaultProps = {
@@ -149,11 +158,11 @@ export default class MentionSuggestions extends Component {
   };
 
   onSearchChange = (editorState, selection) => {
-    const { word } = getSearchText(editorState, selection);
-    const searchValue = word.substring(1, word.length);
-    if (this.lastSearchValue !== searchValue) {
-      this.lastSearchValue = searchValue;
-      this.props.onSearchChange({ value: searchValue });
+    const { matchingString } = getSearchText(editorState, selection, this.props.mentionTrigger);
+
+    if (this.lastSearchValue !== matchingString) {
+      this.lastSearchValue = matchingString;
+      this.props.onSearchChange({ value: matchingString });
     }
   };
 
@@ -269,12 +278,22 @@ export default class MentionSuggestions extends Component {
       return null;
     }
 
-    const { theme = {} } = this.props;
-    const { entryComponent, ...props } = this.props;
+    const {
+      entryComponent,
+      onSearchChange, // eslint-disable-line no-unused-vars, no-shadow
+      suggestions, // eslint-disable-line no-unused-vars
+      ariaProps, // eslint-disable-line no-unused-vars
+      callbacks, // eslint-disable-line no-unused-vars
+      theme = {},
+      store, // eslint-disable-line no-unused-vars
+      entityMutability, // eslint-disable-line no-unused-vars
+      positionSuggestions, // eslint-disable-line no-unused-vars
+      mentionTrigger, // eslint-disable-line no-unused-vars
+      ...elementProps } = this.props;
 
     return (
       <div
-        {...props}
+        {...elementProps}
         className={theme.mentionSuggestions}
         role="listbox"
         id={`mentions-list-${this.key}`}
