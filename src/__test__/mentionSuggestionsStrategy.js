@@ -2,11 +2,12 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 import { genKey, convertFromRaw } from 'draft-js';
 import mentionSuggestionsStrategy from '../mentionSuggestionsStrategy';
-
+import defaultRegExp from '../defaultRegExp'
 let callback;
 const trigger = '@';
-const nonWhitespaceStrategy = mentionSuggestionsStrategy(trigger, false);
-const whitespaceStrategy = mentionSuggestionsStrategy(trigger, true, 20);
+const nonWhitespaceStrategy = mentionSuggestionsStrategy(trigger, defaultRegExp);
+const whitespaceStrategy = mentionSuggestionsStrategy(trigger, '[\\w\\s]{0,20}');
+
 const getBlock = (text, entityRanges = [], entityMap = {}) => {
   const contentState = convertFromRaw({
     blocks: [{
@@ -72,19 +73,19 @@ describe('mentionSuggestionsStrategy', () => {
     });
 
     it('should match multiple mentions with spaces', () => {
-      whitespaceStrategy(getBlock('@the walking dead tv @the white house'), callback);
+      whitespaceStrategy(getBlock('@the walking dead tv and @the white house'), callback);
       expect(callback.callCount).to.equal(2);
       expect(callback.firstCall.args).to.deep.equal([0, 21]);
-      expect(callback.secondCall.args).to.deep.equal([21, 37]);
+      expect(callback.secondCall.args).to.deep.equal([24, 41]);
     });
 
     it('should not match entities', () => {
       const key = genKey();
       whitespaceStrategy(getBlock(
-        '@the walking dead tv the white house',
+        '@the walking dead tv and @the white house',
         [{
           key,
-          offset: 20,
+          offset: 24,
           length: 15,
         }],
         {
@@ -96,7 +97,7 @@ describe('mentionSuggestionsStrategy', () => {
         },
       ), callback);
       expect(callback.callCount).to.equal(1);
-      expect(callback.lastCall.args).to.deep.equal([0, 20]);
+      expect(callback.firstCall.args).to.deep.equal([0, 21]);
     });
   });
 });

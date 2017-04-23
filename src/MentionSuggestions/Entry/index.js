@@ -6,8 +6,9 @@ import React, {
 export default class Entry extends Component {
 
   static propTypes = {
-    entryComponent: PropTypes.func.isRequired,
-    searchValue: PropTypes.string.isRequired
+    entryComponent: PropTypes.any.isRequired,
+    searchValue: PropTypes.string,
+    onMentionSelect: PropTypes.func
   };
 
   constructor(props) {
@@ -21,8 +22,8 @@ export default class Entry extends Component {
 
   onMouseUp = () => {
     if (this.mouseDown) {
-      this.mouseDown = false;
       this.props.onMentionSelect(this.props.mention);
+      this.mouseDown = false;
     }
   };
 

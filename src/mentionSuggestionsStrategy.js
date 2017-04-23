@@ -1,6 +1,6 @@
 /* @flow */
 
-import escapeRegExp from 'lodash/escapeRegExp';
+import escapeRegExp from 'lodash.escaperegexp';
 
 const findWithRegex = (regex, contentBlock, callback) => {
   const contentBlockText = contentBlock.getText();
@@ -22,12 +22,6 @@ const findWithRegex = (regex, contentBlock, callback) => {
   );
 };
 
-export default (trigger: string, supportWhiteSpace: boolean, maxSuggestionsCharacters: number) => {
-  const MENTION_REGEX = supportWhiteSpace ?
-    new RegExp(`${escapeRegExp(trigger)}[\\w\\s]{0,${maxSuggestionsCharacters}}`, 'g') :
-    new RegExp(`(\\s|^)${escapeRegExp(trigger)}[\\w]*`, 'g');
-
-  return (contentBlock: Object, callback: Function) => {
-    findWithRegex(MENTION_REGEX, contentBlock, callback);
-  };
+export default (trigger: string, regExp: string) => (contentBlock: Object, callback: Function) => {
+  findWithRegex(new RegExp(`(\\s|^)${escapeRegExp(trigger)}${regExp}`, 'g'), contentBlock, callback);
 };
